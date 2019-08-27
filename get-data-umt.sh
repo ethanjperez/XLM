@@ -106,8 +106,8 @@ done
 #
 # Link parallel validation and test data to monolingual data
 #
-ln -sf $PROC_PATH/valid.$SRC.pth $PROC_PATH/valid.$SRC-$TGT.$SRC
-ln -sf $PROC_PATH/valid.$TGT.pth $PROC_PATH/valid.$SRC-$TGT.$TGT
+ln -sf $PROC_PATH/valid.$SRC.pth $PROC_PATH/valid.$SRC-$TGT.$SRC.pth
+ln -sf $PROC_PATH/valid.$TGT.pth $PROC_PATH/valid.$SRC-$TGT.$TGT.pth
 
 #
 # Summary
