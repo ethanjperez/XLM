@@ -10,7 +10,7 @@
 
 set -e
 
-N_THREADS=8
+N_THREADS=16
 
 lg=$1
 TOOLS_PATH=$PWD/tools
