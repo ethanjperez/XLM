@@ -57,6 +57,7 @@ def init_distributed_mode(params):
     print("SLURM job: %s" % str(params.is_slurm_job))
 
     # SLURM job
+    params.is_slurm_job = False
     if params.is_slurm_job:
 
         assert params.local_rank == -1   # on the cluster, this is handled by SLURM
