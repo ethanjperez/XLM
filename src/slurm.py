@@ -128,7 +128,7 @@ def init_distributed_mode(params):
         params.n_gpu_per_node = 1
 
     # sanity checks
-    assert params.n_nodes >= 1
+    assert params.n_nodes >= 1  # f'params.n_nodes={params.n_nodes}, params.world_size={params.world_size}, params.n_gpu_per_node={params.n_gpu_per_node}'
     assert 0 <= params.node_id < params.n_nodes
     assert 0 <= params.local_rank <= params.global_rank < params.world_size
     assert params.world_size == params.n_nodes * params.n_gpu_per_node
