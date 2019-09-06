@@ -59,10 +59,6 @@ LOWER_REMOVE_ACCENT=$TOOLS_PATH/lowercase_and_remove_accent.py
 DATA_PATH=$PWD/data/umt/$DATA_FOLDER
 PROC_PATH=$DATA_PATH/processed
 
-# create paths
-mkdir -p $TOOLS_PATH
-mkdir -p $PROC_PATH
-
 # fastBPE
 FASTBPE=$TOOLS_PATH/fastBPE/fast
 
@@ -70,20 +66,9 @@ FASTBPE=$TOOLS_PATH/fastBPE/fast
 BPE_CODES=$PROC_PATH/codes
 FULL_VOCAB=$PROC_PATH/vocab.$SRC-$TGT
 
-# install tools
-./install-tools.sh
-
-# reload BPE codes
-echo "Reloading BPE codes from $RELOAD_CODES ..."
-cp $RELOAD_CODES $BPE_CODES
-
-# reload full vocabulary
-echo "Reloading vocabulary from $RELOAD_VOCAB ..."
-cp $RELOAD_VOCAB $FULL_VOCAB
-
 # preprocess
 for lg in $SRC $TGT; do
-  for split in "valid" "train"; do
+  for split in "test"; do
     RAW=$DATA_PATH/$split.$lg
     TOK=$RAW.tok
     BPE=$PROC_PATH/$split.$lg
@@ -108,14 +93,6 @@ done
 #
 ln -sf $PROC_PATH/valid.$SRC.pth $PROC_PATH/valid.$SRC-$TGT.$SRC.pth
 ln -sf $PROC_PATH/valid.$TGT.pth $PROC_PATH/valid.$SRC-$TGT.$TGT.pth
-
-for lg in $SRC $TGT; do
-  BPE=$PROC_PATH/test.$lg
-  NUM_VALID=`wc -l < $PROC_PATH/valid.$lg`
-  tail -$NUM_VALID $PROC_PATH/train.$lg > $BPE
-  $MAIN_PATH/preprocess.py $FULL_VOCAB $BPE
-done
-# TODO: Make test data the first wc -l
 
 
 #
