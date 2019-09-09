@@ -72,7 +72,7 @@ def main(params):
 
     # build dictionary / build encoder / build decoder / reload weights
     dico = Dictionary(reloaded['dico_id2word'], reloaded['dico_word2id'], reloaded['dico_counts'])
-    encoder = TransformerModel(model_params, dico, is_encoder=True, with_output=True).cuda().eval()
+    encoder = TransformerModel(model_params, dico, is_encoder=True, with_output=False).cuda().eval()
     decoder = TransformerModel(model_params, dico, is_encoder=False, with_output=True).cuda().eval()
     encoder.load_state_dict(reloaded['encoder'])
     if all([k.startswith('module.') for k in reloaded['encoder'].keys()]):
