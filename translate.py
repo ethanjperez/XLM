@@ -74,12 +74,12 @@ def main(params):
     dico = Dictionary(reloaded['dico_id2word'], reloaded['dico_word2id'], reloaded['dico_counts'])
     encoder = TransformerModel(model_params, dico, is_encoder=True, with_output=False).cuda().eval()
     decoder = TransformerModel(model_params, dico, is_encoder=False, with_output=True).cuda().eval()
-    encoder.load_state_dict(reloaded['encoder'])
     if all([k.startswith('module.') for k in reloaded['encoder'].keys()]):
         reloaded['encoder'] = {k[len('module.'):]: v for k, v in reloaded['encoder'].items()}
-    decoder.load_state_dict(reloaded['decoder'])
+    encoder.load_state_dict(reloaded['encoder'])
     if all([k.startswith('module.') for k in reloaded['decoder'].keys()]):
         reloaded['decoder'] = {k[len('module.'):]: v for k, v in reloaded['decoder'].items()}
+    decoder.load_state_dict(reloaded['decoder'])
     params.src_id = model_params.lang2id[params.src_lang]
     params.tgt_id = model_params.lang2id[params.tgt_lang]
 

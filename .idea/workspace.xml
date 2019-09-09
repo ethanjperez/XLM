@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="95669538-266e-4269-b3bc-570603015459" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/get-data-umt.sh" beforeDir="false" afterPath="$PROJECT_DIR$/get-data-umt.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/translate.py" beforeDir="false" afterPath="$PROJECT_DIR$/translate.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -83,8 +82,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/translate.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="80" column="74" lean-forward="true" selection-start-line="80" selection-start-column="74" selection-end-line="80" selection-end-column="74" />
+            <state relative-caret-position="273">
+              <caret line="81" column="48" lean-forward="true" selection-start-line="81" selection-start-column="48" selection-end-line="81" selection-end-column="48" />
               <folding>
                 <element signature="e#588#597#0" expanded="true" />
               </folding>
@@ -121,7 +120,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>n_total_iter</find>
       <find>.iter(</find>
       <find>accumulate_gra</find>
       <find>accumulate_gr</find>
@@ -151,6 +149,7 @@
       <find>dec_</find>
       <find>encoder</find>
       <find>decoder</find>
+      <find>with_</find>
     </findStrings>
     <replaceStrings>
       <replace>NGPU</replace>
@@ -267,7 +266,7 @@
       <updated>1566844268303</updated>
       <workItem from="1566844270088" duration="43408000" />
       <workItem from="1567280654871" duration="70347000" />
-      <workItem from="1568038125926" duration="3398000" />
+      <workItem from="1568038125926" duration="4253000" />
     </task>
     <task id="LOCAL-00001" summary="XLM en preprocessing on UMT data">
       <created>1566930301274</created>
@@ -339,11 +338,25 @@
       <option name="project" value="LOCAL" />
       <updated>1567779989487</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Fixing model reload issue in translate.py">
+      <created>1568066519616</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1568066519616</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Fixing model reload issue in translate.py">
+      <created>1568066915684</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1568066915684</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="117153000" />
+    <option name="totallyTimeSpent" value="118008000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-118" y="-1080" width="1920" height="1080" extended-state="0" />
@@ -383,7 +396,8 @@
     <MESSAGE value="XLM en preprocessing on UMT data" />
     <MESSAGE value="Distributed training" />
     <MESSAGE value="Using language embeddings even when loading pre-trained model" />
-    <option name="LAST_COMMIT_MESSAGE" value="Using language embeddings even when loading pre-trained model" />
+    <MESSAGE value="Fixing model reload issue in translate.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixing model reload issue in translate.py" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/tools/tokenize.sh">
@@ -513,8 +527,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/translate.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="80" column="74" lean-forward="true" selection-start-line="80" selection-start-column="74" selection-end-line="80" selection-end-column="74" />
+        <state relative-caret-position="273">
+          <caret line="81" column="48" lean-forward="true" selection-start-line="81" selection-start-column="48" selection-end-line="81" selection-end-column="48" />
           <folding>
             <element signature="e#588#597#0" expanded="true" />
           </folding>
