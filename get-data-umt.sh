@@ -75,15 +75,15 @@ FULL_VOCAB=$PROC_PATH/vocab.$SRC-$TGT
 
 # reload BPE codes
 echo "Reloading BPE codes from $RELOAD_CODES ..."
-cp $RELOAD_CODES $BPE_CODES
+#cp $RELOAD_CODES $BPE_CODES
 
 # reload full vocabulary
 echo "Reloading vocabulary from $RELOAD_VOCAB ..."
-cp $RELOAD_VOCAB $FULL_VOCAB
+#cp $RELOAD_VOCAB $FULL_VOCAB
 
 # preprocess
 for lg in $SRC $TGT; do
-  for split in "valid" "train"; do
+  for split in "test"; do
     RAW=$DATA_PATH/$split.$lg
     TOK=$RAW.tok
     BPE=$PROC_PATH/$split.$lg
@@ -106,17 +106,17 @@ done
 #
 # Link parallel validation and test data to monolingual data
 #
-ln -sf $PROC_PATH/valid.$SRC.pth $PROC_PATH/valid.$SRC-$TGT.$SRC.pth
-ln -sf $PROC_PATH/valid.$TGT.pth $PROC_PATH/valid.$SRC-$TGT.$TGT.pth
-
-for lg in $SRC $TGT; do
-  BPE=$PROC_PATH/test.$lg
-  NUM_VALID=`wc -l < $PROC_PATH/valid.$lg`
-  tail -$NUM_VALID $PROC_PATH/train.$lg > $BPE
-  $MAIN_PATH/preprocess.py $FULL_VOCAB $BPE
+for split in "test"; do
+    ln -sf $PROC_PATH/$split.$SRC.pth $PROC_PATH/$split.$SRC-$TGT.$SRC.pth
+    ln -sf $PROC_PATH/$split.$TGT.pth $PROC_PATH/$split.$SRC-$TGT.$TGT.pth
 done
-# TODO: Make test data the first wc -l
 
+#for lg in $SRC $TGT; do
+#  BPE=$PROC_PATH/test.$lg
+#  NUM_VALID=`wc -l < $PROC_PATH/valid.$lg`
+#  tail -$NUM_VALID $PROC_PATH/train.$lg > $BPE
+#  $MAIN_PATH/preprocess.py $FULL_VOCAB $BPE
+#done
 
 #
 # Summary
@@ -129,4 +129,7 @@ echo "    $TGT: $PROC_PATH/train.$TGT.pth"
 echo "Parallel validation data:"
 echo "    $SRC: $PROC_PATH/valid.$SRC.pth"
 echo "    $TGT: $PROC_PATH/valid.$TGT.pth"
+echo "Parallel test data:"
+echo "    $SRC: $PROC_PATH/test.$SRC.pth"
+echo "    $TGT: $PROC_PATH/test.$TGT.pth"
 echo ""
