@@ -121,8 +121,8 @@ def main(params):
             sent = sent[1:] if len(delimiters) == 1 else sent[1:delimiters[1]]
 
             # output translation
-            source = src_sent[i + j].strip()
-            target = " ".join([dico[sent[k].item()] for k in range(len(sent))])
+            source = src_sent[i + j].strip().replace('@@ ', '')
+            target = " ".join([dico[sent[k].item()] for k in range(len(sent))]).replace('@@ ', '')
             sys.stderr.write("%i / %i: %s -> %s\n" % (i + j, len(src_sent), source, target))
             f.write(target + "\n")
 

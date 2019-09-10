@@ -83,7 +83,7 @@ echo "Reloading vocabulary from $RELOAD_VOCAB ..."
 
 # preprocess
 for lg in $SRC $TGT; do
-  for split in "test"; do
+  for split in "train_para"; do
     RAW=$DATA_PATH/$split.$lg
     TOK=$RAW.tok
     BPE=$PROC_PATH/$split.$lg
@@ -106,10 +106,10 @@ done
 #
 # Link parallel validation and test data to monolingual data
 #
-for split in "test"; do
-    ln -sf $PROC_PATH/$split.$SRC.pth $PROC_PATH/$split.$SRC-$TGT.$SRC.pth
-    ln -sf $PROC_PATH/$split.$TGT.pth $PROC_PATH/$split.$SRC-$TGT.$TGT.pth
-done
+#for split in "test"; do
+#    ln -sf $PROC_PATH/$split.$SRC.pth $PROC_PATH/$split.$SRC-$TGT.$SRC.pth
+#    ln -sf $PROC_PATH/$split.$TGT.pth $PROC_PATH/$split.$SRC-$TGT.$TGT.pth
+#done
 
 #for lg in $SRC $TGT; do
 #  BPE=$PROC_PATH/test.$lg
