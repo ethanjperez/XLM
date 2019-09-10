@@ -21,8 +21,9 @@ import sys
 import argparse
 import torch
 
+from src.evaluation.evaluator import convert_to_text, eval_moses_bleu
 from src.utils import AttrDict
-from src.utils import bool_flag, initialize_exp
+from src.utils import bool_flag, initialize_exp, restore_segmentation
 from src.data.dictionary import Dictionary
 from src.model.transformer import TransformerModel
 
@@ -36,9 +37,18 @@ def get_parser():
 
     # main parameters
     parser.add_argument("--dump_path", type=str, default="./dumped/", help="Experiment dump path")
+    parser.add_argument("--ref_path", type=str, default="./dumped/", help="Reference file path (if evaluating BLEU)")
     parser.add_argument("--exp_name", type=str, default="", help="Experiment name")
     parser.add_argument("--exp_id", type=str, default="", help="Experiment ID")
     parser.add_argument("--batch_size", type=int, default=32, help="Number of sentences per batch")
+
+    # beam search
+    parser.add_argument("--beam_size", type=int, default=1,
+                        help="Beam size, default = 1 (greedy decoding)")
+    parser.add_argument("--length_penalty", type=float, default=1,
+                        help="Length penalty, values < 1.0 favor shorter sentences, while values > 1.0 favor longer ones.")
+    parser.add_argument("--early_stopping", type=bool_flag, default=False,
+                        help="Early stopping, stop as soon as we have `beam_size` hypotheses, although longer ones may have better scores.")
 
     # model / output paths
     parser.add_argument("--model_path", type=str, default="", help="Model path")
@@ -90,8 +100,9 @@ def main(params):
         src_sent.append(line)
     logger.info("Read %i sentences from stdin. Translating ..." % len(src_sent))
 
-    f = io.open(params.output_path, 'w', encoding='utf-8')
+    # f = io.open(params.output_path, 'w', encoding='utf-8')
 
+    hypothesis = []
     for i in range(0, len(src_sent), params.batch_size):
 
         # prepare batch
@@ -109,7 +120,17 @@ def main(params):
         # encode source batch and translate it
         encoded = encoder('fwd', x=batch.cuda(), lengths=lengths.cuda(), langs=langs.cuda(), causal=False)
         encoded = encoded.transpose(0, 1)
-        decoded, dec_lengths = decoder.generate(encoded, lengths.cuda(), params.tgt_id, max_len=int(1.5 * lengths.max().item() + 10))
+        max_len = int(1.5 * lengths.max().item() + 10)
+        if params.beam_size == 1:
+            decoded, dec_lengths = decoder.generate(encoded, lengths.cuda(), params.tgt_id, max_len=max_len)
+        else:
+            decoded, dec_lengths = decoder.generate_beam(
+                encoded, lengths.cuda(), params.tgt_id, beam_size=params.beam_size,
+                length_penalty=params.length_penalty,
+                early_stopping=params.early_stopping,
+                max_len=max_len
+            )
+        # hypothesis.extend(convert_to_text(decoded, dec_lengths, dico, params))
 
         # convert sentences to words
         for j in range(decoded.size(1)):
@@ -121,12 +142,26 @@ def main(params):
             sent = sent[1:] if len(delimiters) == 1 else sent[1:delimiters[1]]
 
             # output translation
-            source = src_sent[i + j].strip().replace('@@ ', '')
-            target = " ".join([dico[sent[k].item()] for k in range(len(sent))]).replace('@@ ', '')
+            source = src_sent[i + j].strip().replace('<unk>', '<<unk>>')
+            target = " ".join([dico[sent[k].item()] for k in range(len(sent))]).replace('<unk>', '<<unk>>')
+            hypothesis.append(target)
             sys.stderr.write("%i / %i: %s -> %s\n" % (i + j, len(src_sent), source, target))
-            f.write(target + "\n")
+            # f.write(target + "\n")
 
-    f.close()
+    # f.close()
+
+    save_dir, split = params.output_path.rsplit('/', 1)
+    hyp_name = f'hyp.bs={params.beam_size}.lp={params.length_penalty}.es={params.early_stopping}.{params.src_lang}-{params.tgt_lang}.{split}.txt'
+    hyp_path = os.path.join(save_dir, hyp_name)
+
+    # export sentences to reference and hypothesis files / restore BPE segmentation
+    with open(hyp_path, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(hypothesis) + '\n')
+    restore_segmentation(hyp_path)
+
+    # evaluate BLEU score
+    bleu = eval_moses_bleu(params.ref_path, hyp_path)
+    logger.info("BLEU %s %s : %f" % (hyp_path, params.ref_path, bleu))
 
 
 if __name__ == '__main__':
