@@ -37,7 +37,7 @@ def get_parser():
 
     # main parameters
     parser.add_argument("--dump_path", type=str, default="./dumped/", help="Experiment dump path")
-    parser.add_argument("--ref_path", type=str, default="./dumped/", help="Reference file path (if evaluating BLEU)")
+    parser.add_argument("--ref_path", type=str, default="", help="Reference file path (if evaluating BLEU)")
     parser.add_argument("--exp_name", type=str, default="", help="Experiment name")
     parser.add_argument("--exp_id", type=str, default="", help="Experiment ID")
     parser.add_argument("--batch_size", type=int, default=32, help="Number of sentences per batch")
@@ -145,7 +145,7 @@ def main(params):
             source = src_sent[i + j].strip().replace('<unk>', '<<unk>>')
             target = " ".join([dico[sent[k].item()] for k in range(len(sent))]).replace('<unk>', '<<unk>>')
             hypothesis.append(target)
-            sys.stderr.write("%i / %i: %s -> %s\n" % (i + j, len(src_sent), source, target))
+            sys.stderr.write("%i / %i: %s -> %s\n" % (i + j, len(src_sent), source.replace('@@ ', ''), target.replace('@@ ', '')))
             # f.write(target + "\n")
 
     # f.close()
@@ -160,8 +160,9 @@ def main(params):
     restore_segmentation(hyp_path)
 
     # evaluate BLEU score
-    bleu = eval_moses_bleu(params.ref_path, hyp_path)
-    logger.info("BLEU %s %s : %f" % (hyp_path, params.ref_path, bleu))
+    if params.ref_path:
+        bleu = eval_moses_bleu(params.ref_path, hyp_path)
+        logger.info("BLEU %s %s : %f" % (hyp_path, params.ref_path, bleu))
 
 
 if __name__ == '__main__':
