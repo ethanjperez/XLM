@@ -43,6 +43,8 @@ def get_parser():
     parser.add_argument("--batch_size", type=int, default=32, help="Number of sentences per batch")
 
     # beam search
+    parser.add_argument("--sample_temperature", type=int, default=None,
+                        help="Beam size, default = None (greedy decoding)")  # NB: Set seed manually?
     parser.add_argument("--beam_size", type=int, default=1,
                         help="Beam size, default = 1 (greedy decoding)")
     parser.add_argument("--length_penalty", type=float, default=1,
@@ -72,6 +74,7 @@ def main(params):
     # generate parser / parse parameters
     parser = get_parser()
     params = parser.parse_args()
+    assert (params.sample_temperature is None) or (params.beam_size == 1), 'Cannot sample with beam search'
     reloaded = torch.load(params.model_path)
     model_params = AttrDict(reloaded['params'])
     logger.info("Supported languages: %s" % ", ".join(model_params.lang2id.keys()))
@@ -122,7 +125,8 @@ def main(params):
         encoded = encoded.transpose(0, 1)
         max_len = int(1.5 * lengths.max().item() + 10)
         if params.beam_size == 1:
-            decoded, dec_lengths = decoder.generate(encoded, lengths.cuda(), params.tgt_id, max_len=max_len)
+            decoded, dec_lengths = decoder.generate(
+                encoded, lengths.cuda(), params.tgt_id, max_len=max_len, sample_temperature=params.sample_temperature)
         else:
             decoded, dec_lengths = decoder.generate_beam(
                 encoded, lengths.cuda(), params.tgt_id, beam_size=params.beam_size,
@@ -151,7 +155,7 @@ def main(params):
     # f.close()
 
     save_dir, split = params.output_path.rsplit('/', 1)
-    hyp_name = f'hyp.bs={params.beam_size}.lp={params.length_penalty}.es={params.early_stopping}.{params.src_lang}-{params.tgt_lang}.{split}.txt'
+    hyp_name = f'hyp.st={params.sample_temperature}.bs={params.beam_size}.lp={params.length_penalty}.es={params.early_stopping}.ei={exp_id}.{params.src_lang}-{params.tgt_lang}.{split}.txt'
     hyp_path = os.path.join(save_dir, hyp_name)
 
     # export sentences to reference and hypothesis files / restore BPE segmentation
