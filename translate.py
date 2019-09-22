@@ -118,7 +118,7 @@ def main(params):
 
     # f = io.open(params.output_path, 'w', encoding='utf-8')
 
-    hypothesis = [[] for _ in params.beam_size]
+    hypothesis = [[] for _ in range(params.beam_size)]
     for i in range(0, len(src_sent), params.batch_size):
 
         # prepare batch
@@ -180,15 +180,17 @@ def main(params):
 
     # export sentences to reference and hypothesis files / restore BPE segmentation
     for hyp_rank in range(len(hypothesis)):
-        with open(hyp_path + '.' + str(hyp_rank), 'w', encoding='utf-8') as f:
+        hyp_path_mod = hyp_path if (len(hypothesis) == 1) else hyp_path + '.' + str(hyp_rank)
+        with open(hyp_path_mod, 'w', encoding='utf-8') as f:
             f.write('\n'.join(hypothesis[hyp_rank]) + '\n')
-        restore_segmentation(hyp_path)
+        restore_segmentation(hyp_path_mod)
 
     # evaluate BLEU score
     if params.ref_path:
         for hyp_rank in range(len(hypothesis)):
-            bleu = eval_moses_bleu(params.ref_path, hyp_path + '.' + str(hyp_rank))
-            logger.info("BLEU %s %s : %f" % (hyp_path + '.' + str(hyp_rank), params.ref_path, bleu))
+            hyp_path_mod = hyp_path if (len(hypothesis) == 1) else hyp_path + '.' + str(hyp_rank)
+            bleu = eval_moses_bleu(params.ref_path, hyp_path_mod)
+            logger.info("BLEU %s %s : %f" % (hyp_path_mod, params.ref_path, bleu))
 
 
 if __name__ == '__main__':
