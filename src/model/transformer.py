@@ -675,7 +675,7 @@ class TransformerModel(nn.Module):
         # visualize hypotheses
         print([len(x) for x in generated_hyps], cur_len)
         globals().update( locals() );
-        !import code; code.interact(local=vars())
+        import code; code.interact(local=vars())
         for ii in range(bs):
             for ss, ww in sorted(generated_hyps[ii].hyp, key=lambda x: x[0], reverse=True):
                 print("%.3f " % ss + " ".join(self.dico[x] for x in ww.tolist()))
