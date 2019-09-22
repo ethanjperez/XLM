@@ -46,7 +46,7 @@ def get_parser():
     parser.add_argument("--batch_size", type=int, default=32, help="Number of sentences per batch")
 
     # beam search
-    parser.add_argument("--sample_temperature", type=int, default=None,
+    parser.add_argument("--sample_temperature", type=float, default=None,
                         help="Beam size, default = None (greedy decoding)")  # NB: Set seed manually?
     parser.add_argument("--beam_size", type=int, default=1,
                         help="Beam size, default = 1 (greedy decoding)")
