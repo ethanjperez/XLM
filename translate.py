@@ -118,7 +118,7 @@ def main(params):
 
     # f = io.open(params.output_path, 'w', encoding='utf-8')
 
-    hypothesis = []
+    hypothesis = [[] for _ in params.beam_size]
     for i in range(0, len(src_sent), params.batch_size):
 
         # prepare batch
@@ -141,11 +141,12 @@ def main(params):
             decoded, dec_lengths = decoder.generate(
                 encoded, lengths.cuda(), params.tgt_id, max_len=max_len, sample_temperature=params.sample_temperature)
         else:
-            decoded, dec_lengths = decoder.generate_beam(
+            decoded, dec_lengths, all_hyp_strs = decoder.generate_beam(
                 encoded, lengths.cuda(), params.tgt_id, beam_size=params.beam_size,
                 length_penalty=params.length_penalty,
                 early_stopping=params.early_stopping,
-                max_len=max_len
+                max_len=max_len,
+                output_all_hyps=True
             )
         # hypothesis.extend(convert_to_text(decoded, dec_lengths, dico, params))
 
@@ -161,7 +162,13 @@ def main(params):
             # output translation
             source = src_sent[i + j].strip().replace('<unk>', '<<unk>>')
             target = " ".join([dico[sent[k].item()] for k in range(len(sent))]).replace('<unk>', '<<unk>>')
-            hypothesis.append(target)
+            if params.beam_size == 1:
+                hypothesis[0].append(target)
+            else:
+                for hyp_rank in range(params.beam_size):
+                    print(all_hyp_strs[j][hyp_rank if hyp_rank < len(all_hyp_strs[j]) else -1])
+                    hypothesis[hyp_rank].append(all_hyp_strs[j][hyp_rank if hyp_rank < len(all_hyp_strs[j]) else -1])
+
             sys.stderr.write("%i / %i: %s -> %s\n" % (i + j, len(src_sent), source.replace('@@ ', ''), target.replace('@@ ', '')))
             # f.write(target + "\n")
 
@@ -172,14 +179,16 @@ def main(params):
     hyp_path = os.path.join(save_dir, hyp_name)
 
     # export sentences to reference and hypothesis files / restore BPE segmentation
-    with open(hyp_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(hypothesis) + '\n')
-    restore_segmentation(hyp_path)
+    for hyp_rank in range(len(hypothesis)):
+        with open(hyp_path + '.' + str(hyp_rank), 'w', encoding='utf-8') as f:
+            f.write('\n'.join(hypothesis[hyp_rank]) + '\n')
+        restore_segmentation(hyp_path)
 
     # evaluate BLEU score
     if params.ref_path:
-        bleu = eval_moses_bleu(params.ref_path, hyp_path)
-        logger.info("BLEU %s %s : %f" % (hyp_path, params.ref_path, bleu))
+        for hyp_rank in range(len(hypothesis)):
+            bleu = eval_moses_bleu(params.ref_path, hyp_path + '.' + str(hyp_rank))
+            logger.info("BLEU %s %s : %f" % (hyp_path + '.' + str(hyp_rank), params.ref_path, bleu))
 
 
 if __name__ == '__main__':
