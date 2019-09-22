@@ -79,7 +79,7 @@ def main(params):
     params = parser.parse_args()
     torch.manual_seed(params.seed)  # Set random seed. NB: Multi-GPU also needs torch.cuda.manual_seed_all(params.seed)
     assert (params.sample_temperature is None) or (params.beam_size == 1), 'Cannot sample with beam search.'
-    assert params.amp >= 2, f'params.amp == {params.amp} not yet supported.'
+    assert params.amp <= 1, f'params.amp == {params.amp} not yet supported.'
     reloaded = torch.load(params.model_path)
     model_params = AttrDict(reloaded['params'])
     logger.info("Supported languages: %s" % ", ".join(model_params.lang2id.keys()))
