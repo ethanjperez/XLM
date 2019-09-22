@@ -41,7 +41,7 @@ def get_parser():
     parser.add_argument("--ref_path", type=str, default="", help="Reference file path (if evaluating BLEU)")
     parser.add_argument("--exp_name", type=str, default="", help="Experiment name")
     parser.add_argument("--exp_id", type=str, default="", help="Experiment ID")
-    parser.add_argument("--seed", type=str, default=42, help="Random seed (for sampled generations)")
+    parser.add_argument("--seed", type=str, default=0, help="Random seed (for sampled generations)")
     parser.add_argument("--amp", type=int, default=0, help="fp16 opt level (0 for fp32)")
     parser.add_argument("--batch_size", type=int, default=32, help="Number of sentences per batch")
 
@@ -185,10 +185,8 @@ def main(params):
             f.write('\n'.join(hypothesis[hyp_rank]) + '\n')
         restore_segmentation(hyp_path_mod)
 
-    # evaluate BLEU score
-    if params.ref_path:
-        for hyp_rank in range(len(hypothesis)):
-            hyp_path_mod = hyp_path if (len(hypothesis) == 1) else hyp_path + '.' + str(hyp_rank)
+        # evaluate BLEU score
+        if params.ref_path:
             bleu = eval_moses_bleu(params.ref_path, hyp_path_mod)
             logger.info("BLEU %s %s : %f" % (hyp_path_mod, params.ref_path, bleu))
 
