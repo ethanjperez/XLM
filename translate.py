@@ -15,6 +15,7 @@
 #     --model_path trained_model.pth --output_path output
 #
 
+import apex
 import os
 import io
 import sys
@@ -40,6 +41,7 @@ def get_parser():
     parser.add_argument("--ref_path", type=str, default="", help="Reference file path (if evaluating BLEU)")
     parser.add_argument("--exp_name", type=str, default="", help="Experiment name")
     parser.add_argument("--exp_id", type=str, default="", help="Experiment ID")
+    parser.add_argument("--amp", type=int, default=0, help="fp16 opt level (0 for fp32)")
     parser.add_argument("--batch_size", type=int, default=32, help="Number of sentences per batch")
 
     # beam search
@@ -93,6 +95,14 @@ def main(params):
     if all([k.startswith('module.') for k in reloaded['decoder'].keys()]):
         reloaded['decoder'] = {k[len('module.'):]: v for k, v in reloaded['decoder'].items()}
     decoder.load_state_dict(reloaded['decoder'])
+
+    if params.amp != 0:
+        models = apex.amp.initialize(
+            [encoder, decoder],
+            opt_level=('O%i' % params.amp)
+        )
+        encoder, decoder = models
+
     params.src_id = model_params.lang2id[params.src_lang]
     params.tgt_id = model_params.lang2id[params.tgt_lang]
 
