@@ -155,7 +155,7 @@ def main(params):
     # f.close()
 
     save_dir, split = params.output_path.rsplit('/', 1)
-    hyp_name = f'hyp.st={params.sample_temperature}.bs={params.beam_size}.lp={params.length_penalty}.es={params.early_stopping}.ei={exp_id}.{params.src_lang}-{params.tgt_lang}.{split}.txt'
+    hyp_name = f'hyp.st={params.sample_temperature}.bs={params.beam_size}.lp={params.length_penalty}.es={params.early_stopping}.ei={params.exp_id}.{params.src_lang}-{params.tgt_lang}.{split}.txt'
     hyp_path = os.path.join(save_dir, hyp_name)
 
     # export sentences to reference and hypothesis files / restore BPE segmentation
