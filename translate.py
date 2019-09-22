@@ -41,6 +41,7 @@ def get_parser():
     parser.add_argument("--ref_path", type=str, default="", help="Reference file path (if evaluating BLEU)")
     parser.add_argument("--exp_name", type=str, default="", help="Experiment name")
     parser.add_argument("--exp_id", type=str, default="", help="Experiment ID")
+    parser.add_argument("--seed", type=str, default=42, help="Random seed (for sampled generations)")
     parser.add_argument("--amp", type=int, default=0, help="fp16 opt level (0 for fp32)")
     parser.add_argument("--batch_size", type=int, default=32, help="Number of sentences per batch")
 
@@ -76,7 +77,9 @@ def main(params):
     # generate parser / parse parameters
     parser = get_parser()
     params = parser.parse_args()
-    assert (params.sample_temperature is None) or (params.beam_size == 1), 'Cannot sample with beam search'
+    torch.manual_seed(params.seed)  # Set random seed. NB: Multi-GPU also needs torch.cuda.manual_seed_all(params.seed)
+    assert (params.sample_temperature is None) or (params.beam_size == 1), 'Cannot sample with beam search.'
+    assert params.amp >= 2, f'params.amp == {params.amp} not yet supported.'
     reloaded = torch.load(params.model_path)
     model_params = AttrDict(reloaded['params'])
     logger.info("Supported languages: %s" % ", ".join(model_params.lang2id.keys()))
@@ -165,7 +168,7 @@ def main(params):
     # f.close()
 
     save_dir, split = params.output_path.rsplit('/', 1)
-    hyp_name = f'hyp.st={params.sample_temperature}.bs={params.beam_size}.lp={params.length_penalty}.es={params.early_stopping}.ei={params.exp_id}.{params.src_lang}-{params.tgt_lang}.{split}.txt'
+    hyp_name = f'hyp.st={params.sample_temperature}.bs={params.beam_size}.lp={params.length_penalty}.es={params.early_stopping}.seed={params.seed}.{params.src_lang}-{params.tgt_lang}.{split}.txt'
     hyp_path = os.path.join(save_dir, hyp_name)
 
     # export sentences to reference and hypothesis files / restore BPE segmentation
