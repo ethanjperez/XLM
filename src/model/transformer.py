@@ -526,7 +526,7 @@ class TransformerModel(nn.Module):
 
         return generated[:cur_len], gen_len
 
-    def generate_beam(self, src_enc, src_len, tgt_lang_id, beam_size, length_penalty, early_stopping, max_len=200):
+    def generate_beam(self, src_enc, src_len, tgt_lang_id, beam_size, length_penalty, early_stopping, max_len=200, output_all_hyps=False):
         """
         Decode a sentence given initial start.
         `x`:
@@ -680,6 +680,11 @@ class TransformerModel(nn.Module):
         #     for ss, ww in sorted(generated_hyps[ii].hyp, key=lambda x: x[0], reverse=True):
         #         print("%.3f " % ss + " ".join(self.dico[x] for x in ww.tolist()))
         #     print("")
+        if output_all_hyps:
+            generated_hyp_strs = [[] for _ in range(bs)]
+            for hyp_rank in range(bs):
+                for ss, ww in sorted(generated_hyps[hyp_rank].hyp, key=lambda x: x[0], reverse=True):
+                    generated_hyp_strs[hyp_rank].append(" ".join(self.dico[x] for x in ww.tolist()[1:]).replace('<unk>', '<<unk>>'))
 
         # select the best hypotheses
         tgt_len = src_len.new(bs)
@@ -699,7 +704,10 @@ class TransformerModel(nn.Module):
         # sanity check
         assert (decoded == self.eos_index).sum() == 2 * bs
 
-        return decoded, tgt_len
+        if output_all_hyps:
+            return decoded, tgt_len, generated_hyp_strs
+        else:
+            return decoded, tgt_len
 
 
 class BeamHypotheses(object):
