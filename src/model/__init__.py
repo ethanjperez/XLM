@@ -170,6 +170,19 @@ def build_model(params, dico):
                 dec_reload = dec_reload['model' if 'model' in dec_reload else 'decoder']
                 if all([k.startswith('module.') for k in dec_reload.keys()]):
                     dec_reload = {k[len('module.'):]: v for k, v in dec_reload.items()}
+
+                # If pre-trained model has more unused weights, init the decoder with these weights
+                # NB: dec_reload 'pred_layer.proj.weight' not in decoder
+                num_keys_fixed = 0
+                for i in range(params.n_layers, 2 * params.n_layers):
+                    keys_to_fix = [k for k in dec_reload.keys() if f'.{i}.' in k]
+                    for k in keys_to_fix:
+                        new_k = k.replace(f'.{i}.', f'.{i % params.n_layers}.')
+                        dec_reload.pop(new_k)  # Check that you're replacing an existing key
+                        dec_reload[new_k] = dec_reload.pop(k)
+                        num_keys_fixed += 1
+                logger.info("Keys fixed while reloading decoder: %i ..." % num_keys_fixed)
+
                 for i in range(params.n_layers):
                     for name in DECODER_ONLY_PARAMS:
                         if name % i not in dec_reload:
