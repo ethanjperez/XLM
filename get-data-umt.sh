@@ -1,4 +1,4 @@
-# Usage: ./get-data-umt.sh --src mh --tgt sh --reload_codes dumped/xlm_en/codes_en --reload_vocab dumped/xlm_en/vocab_en --data_folder comparison.paired
+# Usage: ./get-data-umt.sh --src mh --tgt sh --reload_codes dumped/xlm_en/codes_en --reload_vocab dumped/xlm_en/vocab_en --data_folder all
 # This script will successively:
 # 1) download Moses scripts, download and compile fastBPE
 # 2) download, extract, tokenize, apply BPE to monolingual and parallel test data
@@ -83,7 +83,7 @@ cp $RELOAD_VOCAB $FULL_VOCAB
 
 # preprocess
 for lg in $SRC $TGT; do
-  for split in "train"; do  # "train_para" "valid" "test"
+  for split in "train" "valid" "test"; do
     RAW=$DATA_PATH/$split.$lg
     TOK=$RAW.tok
     BPE=$PROC_PATH/$split.$lg
@@ -106,15 +106,15 @@ done
 #
 # Link parallel validation and test data to monolingual data
 #
-#for split in "valid" "test"; do
-#    ln -sf $PROC_PATH/$split.$SRC.pth $PROC_PATH/$split.$SRC-$TGT.$SRC.pth
-#    ln -sf $PROC_PATH/$split.$TGT.pth $PROC_PATH/$split.$SRC-$TGT.$TGT.pth
-#done
+for split in "valid" "test"; do
+    ln -sf $PROC_PATH/$split.$SRC.pth $PROC_PATH/$split.$SRC-$TGT.$SRC.pth
+    ln -sf $PROC_PATH/$split.$TGT.pth $PROC_PATH/$split.$SRC-$TGT.$TGT.pth
+done
 
 #for lg in $SRC $TGT; do
 #  BPE=$PROC_PATH/test.$lg
 #  NUM_VALID=`wc -l < $PROC_PATH/valid.$lg`
-#  tail -$NUM_VALID $PROC_PATH/train.$lg > $BPE
+#  head -$NUM_VALID $PROC_PATH/train.$lg > $BPE
 #  $MAIN_PATH/preprocess.py $FULL_VOCAB $BPE
 #done
 
