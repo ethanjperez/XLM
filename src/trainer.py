@@ -255,6 +255,7 @@ class Trainer(object):
             return
 
         s_iter = "%7i - " % self.n_total_iter
+        s_iter += "%12i - " % self.n_sentences
         s_stat = ' || '.join([
             '{}: {:7.4f}'.format(k, np.mean(v)) for k, v in self.stats.items()
             if type(v) is list and len(v) > 0
